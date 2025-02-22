@@ -1,0 +1,44 @@
+name: Java Deploy com Maven
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml
+
+    - name: Install sshpass
+      run: sudo apt-get update && sudo apt-get install -y sshpass
+
+    - name: Deploy to VPS
+      env:
+        VPS_USER: ${{ secrets.VPS_USER }}
+        VPS_PASSWORD: ${{ secrets.VPS_PASSWORD }}
+        VPS_HOST: ${{ secrets.VPS_HOST }}
+      run: |
+        # Enviar o JAR para o VPS usando senha
+        sshpass -p "$VPS_PASSWORD" scp -o StrictHostKeyChecking=no target/*.jar $VPS_USER@$VPS_HOST:/home/$VPS_USER/app.jar
+
+        # Conectar ao VPS e reiniciar a aplicação
+        sshpass -p "$VPS_PASSWORD" ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << 'EOF'
+          # Matar a aplicação se estiver rodando
+          pkill -f 'java -jar' || true
+          
+          # Iniciar novamente
+          nohup java -jar /home/$VPS_USER/app.jar > app.log 2>&1 &
+        EOF
