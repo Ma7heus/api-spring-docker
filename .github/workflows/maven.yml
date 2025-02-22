@@ -11,14 +11,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout main repository
+    - name: Checkout do projeto principal
       uses: actions/checkout@v4
 
     - name: Checkout para dependencia (java-api-architecture)
       uses: actions/checkout@v4
       with:
         repository: 'Ma7heus/java-api-architecture'
-        token: ${{ secrets.MY_PAT }}
+        token: ${{ secrets.PAT }}
         path: architecture
 
     - name: Build and install dependency
