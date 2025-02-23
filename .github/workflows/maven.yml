@@ -37,14 +37,14 @@ jobs:
     - name: Install sshpass
       run: sudo apt-get update && sudo apt-get install -y sshpass
 
-    - name: Deploy to VPS
+    - name: Deploy .jar no VPS
       env:
         VPS_USER: ${{ secrets.VPS_USER }}
         VPS_PASSWORD: ${{ secrets.VPS_PASSWORD }}
         VPS_HOST: ${{ secrets.VPS_HOST }}
       run: |
         # Enviar o JAR para o VPS usando senha
-        sshpass -p "$VPS_PASSWORD" scp -o StrictHostKeyChecking=no target/*.jar $VPS_USER@$VPS_HOST:/home/$VPS_USER/app.jar
+        sshpass -p "$VPS_PASSWORD" scp -o StrictHostKeyChecking=no target/*.jar $VPS_USER@$VPS_HOST:/home
 
         # Conectar ao VPS e reiniciar a aplicação
         sshpass -p "$VPS_PASSWORD" ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << 'EOF'
@@ -52,5 +52,5 @@ jobs:
           pkill -f 'java -jar' || true
           
           # Iniciar novamente
-          nohup java -jar /home/$VPS_USER/app.jar > app.log 2>&1 &
+          nohup java -jar /home/$VPS_USER/*.jar > app.log 2>&1 &
         EOF
