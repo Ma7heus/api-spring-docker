@@ -14,7 +14,7 @@ public class TestController {
 	
 	@GetMapping
 	ResponseEntity<String> getTest(){
-		return ResponseEntity.status(HttpStatus.OK).body("DEU CERTO!");
+		return ResponseEntity.status(HttpStatus.OK).body("DEU CERTO MESMO!");
 	}
 
 }
